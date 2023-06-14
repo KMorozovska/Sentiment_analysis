@@ -17,9 +17,8 @@ time.sleep(5)
 places = driver.find_elements(By.CLASS_NAME, "location-meta-block")
 print(len(places))
 
-all_titles = []
-all_rtexts = []
-all_places = []
+reviews_pd = pd.DataFrame(columns=['Title', 'Review', 'Location'])
+reviews_pd.to_csv("trip_advisor_reviews_" + city + ".csv")
 
 for elem, i in zip(places, range(0, len(places))):
     place_name = elem.text.split('\n')[0]
@@ -32,6 +31,9 @@ for elem, i in zip(places, range(0, len(places))):
     print(driver.current_url)
     driver.switch_to.window(driver.window_handles[i+1])
     print(driver.current_url)
+
+    all_titles = []
+    all_rtexts = []
 
     # collecting n pages of reviews
     for j in range(0, 3):
@@ -58,15 +60,20 @@ for elem, i in zip(places, range(0, len(places))):
 
         j += 1
 
+    print(len(all_titles))
+    print(len(all_rtexts))
+
+    # save reviews for each location by appending to .csv
+    single_place_reviews_dict = dict(zip(all_titles, all_rtexts))
+    single_place_reviews_df = pd.DataFrame(single_place_reviews_dict.items(), columns=['Title', 'Review'])
+    single_place_reviews_df['Location'] = place_name
+    single_place_reviews_df.to_csv("trip_advisor_reviews_" + city + ".csv", mode='a', header=False)
+
     i += 1
     driver.switch_to.window(driver.window_handles[0])
 
 
-print(len(all_titles))
-print(len(all_rtexts))
 
-reviews_dict = dict(zip(all_titles, all_rtexts))
-reviews_pd = pd.DataFrame(reviews_dict.items(), columns=['Title', 'Review'])
-reviews_pd.to_csv("trip_advisor_" + city + ".csv")
+
 
 
