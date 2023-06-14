@@ -1,8 +1,6 @@
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-import time
-from utils import city, check_exists_by_xpath
-import pandas as pd
+from collect_reviews_from_single_location import *
+
 
 URL = "https://www.tripadvisor.com/Search?q=" + city
 driver = webdriver.Chrome('./chromedriver')
@@ -30,39 +28,7 @@ for elem, i in zip(places, range(0, len(places))):
 
     driver.switch_to.window(driver.window_handles[i+1])
 
-    all_titles = []
-    all_rtexts = []
-
-    # collecting n pages of reviews
-    for j in range(0, 3):
-
-        reviews_section = driver.find_element(By.CSS_SELECTOR, ".eSDnY")
-
-        # collecting review titles
-        titles = reviews_section.find_elements(By.CSS_SELECTOR, ".biGQs._P.fiohW.qWPrE.ncFvv.fOtGX")
-        for title in titles:
-            all_titles.append(title.get_attribute("innerText"))
-
-        # collecting review main texts
-        rtexts = reviews_section.find_elements(By.CSS_SELECTOR, ".biGQs._P.pZUbB.KxBGd")
-        for rtext in rtexts:
-            if rtext.get_attribute("innerText")[0:10] != "Review of:":
-                all_rtexts.append(rtext.get_attribute("innerText"))
-
-        all_rtexts.pop(j*10)    # removes unnecessary top of the page element with the same css selector
-
-        if check_exists_by_xpath(reviews_section, "//a[contains(@aria-label, 'Next page')]"):
-            next_review_page_button = reviews_section.find_element(By.XPATH, "//a[contains(@aria-label, 'Next page')]")
-            driver.execute_script("arguments[0].click();", next_review_page_button)
-            time.sleep(10)
-
-        j += 1
-
-    # save reviews for each location by appending to .csv
-    single_place_reviews_dict = dict(zip(all_titles, all_rtexts))
-    single_place_reviews_df = pd.DataFrame(single_place_reviews_dict.items(), columns=['Title', 'Review'])
-    single_place_reviews_df['Location'] = place_name
-    single_place_reviews_df.to_csv("trip_advisor_reviews_" + city + ".csv", mode='a', header=False)
+    collect_reviews_from_single_location(driver, place_name)
 
     i += 1
     driver.switch_to.window(driver.window_handles[0])
