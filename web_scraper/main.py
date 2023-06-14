@@ -28,9 +28,7 @@ for elem, i in zip(places, range(0, len(places))):
     driver.execute_script("arguments[0].click();", attraction_button)
     time.sleep(10)
 
-    print(driver.current_url)
     driver.switch_to.window(driver.window_handles[i+1])
-    print(driver.current_url)
 
     all_titles = []
     all_rtexts = []
@@ -59,9 +57,6 @@ for elem, i in zip(places, range(0, len(places))):
             time.sleep(10)
 
         j += 1
-
-    print(len(all_titles))
-    print(len(all_rtexts))
 
     # save reviews for each location by appending to .csv
     single_place_reviews_dict = dict(zip(all_titles, all_rtexts))
