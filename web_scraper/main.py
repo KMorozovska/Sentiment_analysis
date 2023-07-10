@@ -1,10 +1,10 @@
 from selenium import webdriver
 from collect_reviews_from_single_location import *
+from utils import city
 
 
 URL = "https://www.tripadvisor.com/Search?q=" + city
-driver = webdriver.Chrome('./chromedriver')
-op = webdriver.ChromeOptions()
+driver = webdriver.Chrome()
 
 driver.get(URL)
 
@@ -15,7 +15,7 @@ time.sleep(5)
 places = driver.find_elements(By.CLASS_NAME, "location-meta-block")
 print(len(places))
 
-reviews_pd = pd.DataFrame(columns=['Title', 'Review', 'Location'])
+reviews_pd = pd.DataFrame(columns=['Title', 'Review', 'Score', 'City', 'Location'])
 reviews_pd.to_csv("trip_advisor_reviews_" + city + ".csv")
 
 for elem, i in zip(places, range(0, len(places))):
@@ -28,7 +28,7 @@ for elem, i in zip(places, range(0, len(places))):
 
     driver.switch_to.window(driver.window_handles[i+1])
 
-    collect_reviews_from_single_location(driver, place_name)
+    collect_reviews_from_single_location(driver, city, place_name)
 
     i += 1
     driver.switch_to.window(driver.window_handles[0])
